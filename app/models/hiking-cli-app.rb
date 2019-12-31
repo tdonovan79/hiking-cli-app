@@ -61,6 +61,7 @@ class TrailsPos
 #main menu to navigate
     def main_menu
         menu = [
+            "My Stats",
             "My Hikes",
             "Trails",
             "Quit"]
@@ -72,10 +73,12 @@ class TrailsPos
             choice = @prompt.select("What would you like to do #{@current_user.name}?", menu)
 
             case choice
-            when "Trails"
-                trail_options
+            when "My Stats"
+                user_stats
             when "My Hikes"
                 hike_options
+            when "Trails"
+                trail_options
             end
         end
     end
@@ -88,10 +91,12 @@ class TrailsPos
 #===========================HIKE MENU================================
 #hike menu
     def hike_options
+        system 'clear'
         menu = ["Start New Hike",
             "End Hike",
             "Edit Hike",
-            "List All My Hikes"]
+            "List All My Hikes",
+            "Exit"]
 
         choice = @prompt.select("Which option would you like to take?", menu)
 
@@ -307,8 +312,21 @@ end
                             #USER
 #======================================================================
 
+#===========================STATS=====================================
+#view user stats
+    def user_stats
+        system 'clear'
+        puts "Name: #{@current_user.name}"
+        puts "Number of hikes: #{@current_user.reload.hikes.length}"
+        puts "Number of trails hiked: #{@current_user.reload.hikes.select(&:trail).uniq.length}"
+        #TODO fix this vvvvvvvv
+        #puts "Miles hiked: #{@current_user.reload.hikes.trails.select(&:length).sum}"
+        @prompt.keypress("Press any key to continue")
+    end
 
 
+
+#==========================HELPER FUNCTIONS============================
 
 
 
