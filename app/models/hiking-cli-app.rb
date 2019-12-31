@@ -216,7 +216,7 @@ class TrailsPos
         when "Name"
             search_trail_name(trail_array)
         when "Length"
-            #search_trail_length(trail_array)
+            search_trail_length(trail_array)
         end
     end
 
@@ -232,6 +232,16 @@ class TrailsPos
         end
     end
 
+#search for trail by length in a range and return and print array of trails
+    def search_trail_length(trail_array)
+        system 'clear'
+        range = @prompt.collect do
+            key(:begin).ask("From: ")
+            key(:end).ask("To: ")
+        end
+        search_results = trail_array.select{|trail_instance| trail_instance.length.between?(range[:begin].to_i, range[:end].to_i)}
+        search_results.each{|trail_instance| trail_printer(trail_instance)}
+    end
 
 
 #======================MISC HELPERS=======================================
