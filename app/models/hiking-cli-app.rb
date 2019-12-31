@@ -13,6 +13,10 @@ class TrailsPos
         @prompt = TTY::Prompt.new
     end
 
+#=====================================================================
+                            #STARTUP
+#=====================================================================
+
 #=========================LOGIN=======================================
 #get username and pass through to main menu 
 #TODO: passwords and authentication
@@ -56,34 +60,58 @@ class TrailsPos
 #=========================MAIN MENU=======================================
 #main menu to navigate
     def main_menu
+        menu = [
+            "My Hikes",
+            "Trails",
+            "Quit"]
         choice = nil
-        menu = ["Start New Hike",
-        "End Hike",
-        "Edit Hike",
-        "List All My Hikes",
-        "See Trails",
-        "Quit"]
         while choice != "Quit"
             sleep(0.5)
             system 'clear'
+
             choice = @prompt.select("What would you like to do #{@current_user.name}?", menu)
+
             case choice
-            when "Start New Hike"
-                start_hike
-            when "End Hike"
-            end_hike
-            when "Edit Hike"
-                edit_options
-            when "List All My Hikes"
-                list_user_hikes
-            when "See Trails"
+            when "Trails"
                 trail_options
+            when "My Hikes"
+                hike_options
             end
         end
     end
 
 
-#======================START/END=======================================
+#====================================================================
+                                #HIKES
+#====================================================================
+
+#===========================HIKE MENU================================
+#hike menu
+    def hike_options
+        menu = ["Start New Hike",
+            "End Hike",
+            "Edit Hike",
+            "List All My Hikes"]
+
+        choice = @prompt.select("Which option would you like to take?", menu)
+
+        case choice
+        when "Start New Hike"
+            start_hike
+        when "End Hike"
+        end_hike
+        when "Edit Hike"
+            edit_options
+        when "List All My Hikes"
+            list_user_hikes
+        end
+
+    end
+
+
+
+#===========================HIKE START/END===========================
+
 #log a new hike for a user
     def start_hike
         trail_name = @prompt.select("Which trail?", Trail.all.map(&:name))
@@ -183,22 +211,40 @@ class TrailsPos
         @prompt.keypress("Press any key to continue")
     end
 
-#======================TRAIL LISTING/SEARCHING=======================================
-#gives options for viewing trails
-    def trail_options
-        menu = ["View All Trails", 
-            "Search for Trail", 
-            "Exit"]
-        system 'clear'
-        choice = @prompt.select("Which action would you like to take?", menu)
-        case choice
-        when "View All Trails"
-            print_trail_info(Trail.all)
-        when "Search for Trail"
-            search_for_trail(Trail.all)
-        end
-        @prompt.keypress("Press any key to continue")
+#===========================HIKE HELPERS===============================
+
+#takes in array of hikes, outputs infor in structure for menu choices
+    def hike_menu_maker(hike_array)
+        hike_array.map do |hike_instance|
+            [hike_instance.trail.name + hike_instance.date.strftime(" - %m/%d/%Y - %H:%M"), hike_instance]
+        end.to_h
     end
+
+#======================================================================
+                                #TRAILS                     
+#======================================================================
+
+#=============================TRAIL MENU==============================
+
+#gives options for viewing trails
+def trail_options
+    menu = ["View All Trails", 
+        "Search for Trail", 
+        "Exit"]
+    system 'clear'
+    choice = @prompt.select("Which action would you like to take?", menu)
+    case choice
+    when "View All Trails"
+        print_trail_info(Trail.all)
+    when "Search for Trail"
+        search_for_trail(Trail.all)
+    end
+    @prompt.keypress("Press any key to continue")
+end
+
+
+
+#===========================TRAIL LISTING==================================
 
 #prints all trail info
     def print_trail_info(trails_array)
@@ -206,6 +252,9 @@ class TrailsPos
             trail_printer(trail_instance)
         end
     end
+
+
+#==========================TRAIL SEARCHING=============================
 
 #choose to search for trail by name or by length
     def search_for_trail(trail_array)
@@ -244,13 +293,8 @@ class TrailsPos
     end
 
 
-#======================MISC HELPERS=======================================
-#takes in array of hikes, outputs infor in structure for menu choices
-    def hike_menu_maker(hike_array)
-        hike_array.map do |hike_instance|
-            [hike_instance.trail.name + hike_instance.date.strftime(" - %m/%d/%Y - %H:%M"), hike_instance]
-        end.to_h
-    end
+#============================TRAIL HELPERS=============================
+
 #take in argument of trail and displays info in easy to read format
     def trail_printer(trail_instance)
         puts "Trail Name: #{trail_instance.name}"
@@ -258,4 +302,15 @@ class TrailsPos
         15.times {print "*"}
         print "\n"
     end
+
+#======================================================================
+                            #USER
+#======================================================================
+
+
+
+
+
+
+#=====================================================================
 end#end of TRAILSPOS class
