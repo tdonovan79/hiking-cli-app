@@ -3,6 +3,7 @@ Bundler.require
 require "sinatra/activerecord"
 require "ostruct"
 require "date"
+require "database_cleaner"
 require_all 'app/models'
 
 ENV["SINATRA_ENV"] ||= 'development'

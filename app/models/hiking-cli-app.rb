@@ -46,7 +46,6 @@ class TrailsPos
 
     #create new user account
     def create_account
-        
         new_user = @prompt.ask("Enter username: ")
         new_password = @prompt.mask("Enter password: ")
         @current_user = User.create(name: new_user, password: new_password)
@@ -62,6 +61,7 @@ class TrailsPos
         "End Hike",
         "Edit Hike",
         "List All My Hikes",
+        "See Trails",
         "Quit"]
         while choice != "Quit"
             sleep(0.5)
@@ -73,9 +73,11 @@ class TrailsPos
             when "End Hike"
             end_hike
             when "Edit Hike"
-                edit_choice
+                edit_options
             when "List All My Hikes"
-             print_hike_info(@current_user.reload.hikes)
+                list_user_hikes
+            when "See Trails"
+                trail_options
             end
         end
     end
@@ -110,8 +112,9 @@ class TrailsPos
 #======================EDIT HIKES========================================
 
     #allow user to choose a hike and then edit it
-    def edit_choice
+    def edit_options
         menu = hike_menu_maker(@current_user.reload.hikes)
+        system 'clear'
         if menu.length > 0
             choice = @prompt.select("Which hike would you like to edit?", menu)
             edit_hike_menu(choice)
@@ -124,7 +127,8 @@ class TrailsPos
     #choose what you would like to edit
     #TODO add exit option
     def edit_hike_menu(hike_instance)
-        menu = ["Delete", "Change Time on Trail"]
+        menu = ["Delete", "Change Time on Trail", "Exit"]
+        system 'clear'
         choice = @prompt.select("Which action would you like to take?", menu)
         case choice
         when "Delete"
@@ -136,6 +140,7 @@ class TrailsPos
 
     #after warning message, delete hike
     def delete_hike(hike_instance)
+        system 'clear'
         if @prompt.yes?("Are you sure you would like to delete #{hike_instance.trail.name}" + hike_instance.date.strftime(" - %m/%d/%Y") + "?")
             hike_instance.destroy
             puts "Hike has been deleted."
@@ -154,7 +159,7 @@ class TrailsPos
         @prompt.keypress("Press any key to continue")
     end
 
-#======================HIKE/TRAIL LISTING=======================================
+#======================HIKE LISTING=======================================
 #prints all hikes information from an array of hikes
     def print_hike_info(hike_array)
         hike_array.each do |hike_instance|
@@ -166,15 +171,81 @@ class TrailsPos
             15.times {print "*"}
             print "\n"
         end
+    end
+
+#lists all hikes for a user
+    def list_user_hikes
+        if @current_user.reload.hikes.length > 0
+            print_hike_info(@current_user.reload.hikes)
+        else
+            puts "There are no hikes to display."
+        end
         @prompt.keypress("Press any key to continue")
     end
+
+#======================TRAIL LISTING/SEARCHING=======================================
+#gives options for viewing trails
+    def trail_options
+        menu = ["View All Trails", 
+            "Search for Trail", 
+            "Exit"]
+        system 'clear'
+        choice = @prompt.select("Which action would you like to take?", menu)
+        case choice
+        when "View All Trails"
+            print_trail_info(Trail.all)
+        when "Search for Trail"
+            search_for_trail(Trail.all)
+        end
+        @prompt.keypress("Press any key to continue")
+    end
+
+#prints all trail info
+    def print_trail_info(trails_array)
+        trails_array.each do |trail_instance|
+            trail_printer(trail_instance)
+        end
+    end
+
+#choose to search for trail by name or by length
+    def search_for_trail(trail_array)
+        menu = ["Name", "Length"]
+        system 'clear'
+        choice = @prompt.select("Search by name or length?", menu)
+        case choice
+        when "Name"
+            search_trail_name(trail_array)
+        when "Length"
+            #search_trail_length(trail_array)
+        end
+    end
+
+#search for trail by name and then print info for trail
+    def search_trail_name(trail_array)
+        system 'clear'
+        search_name = @prompt.ask("Enter name: ")
+        search_trail = trail_array.find_by(name: search_name)
+        if search_trail.nil?
+            puts "No trail found by that name."
+        else
+            trail_printer(search_trail)
+        end
+    end
+
 
 
 #======================MISC HELPERS=======================================
 #takes in array of hikes, outputs infor in structure for menu choices
     def hike_menu_maker(hike_array)
         hike_array.map do |hike_instance|
-            [hike_instance.trail.name + hike_instance.date.strftime(" - %m/%d/%Y"), hike_instance]
+            [hike_instance.trail.name + hike_instance.date.strftime(" - %m/%d/%Y - %H:%M"), hike_instance]
         end.to_h
+    end
+#take in argument of trail and displays info in easy to read format
+    def trail_printer(trail_instance)
+        puts "Trail Name: #{trail_instance.name}"
+        puts "Trail Length: #{trail_instance.length} miles"
+        15.times {print "*"}
+        print "\n"
     end
 end#end of TRAILSPOS class
