@@ -14,11 +14,10 @@ class TrailsPos
     def login
         prompt = TTY::Prompt.new
         @current_user = nil
+        system 'clear'
         username = prompt.ask("What is your username?")
         if User.all.map(&:name).include?(username)
             @current_user = User.all.find{|user_instance| user_instance.name == username}
-            sleep(1)
-            system 'clear'
             main_menu
         else
             if prompt.yes?("There is no user by this name. Would you like to create an account?")
@@ -47,7 +46,9 @@ class TrailsPos
         "List All My Hikes",
         "Quit"]
         while choice != "Quit"
-            choice = prompt.select("What would you like to do?", menu)
+            sleep(0.5)
+            system 'clear'
+            choice = prompt.select("What would you like to do #{@current_user.name}?", menu)
             case choice
             when "Start New Hike"
                 start_hike
@@ -56,7 +57,7 @@ class TrailsPos
             when "Edit Hike"
                 edit_choice
             when "List All My Hikes"
-                print_all_hikes(@current_user.reload.hikes)
+             print_hike_info(@current_user.reload.hikes)
             end
         end
     end
@@ -69,6 +70,7 @@ class TrailsPos
         trail_name = prompt.select("Which trail?", Trail.all.map(&:name))
         @current_user.new_hike(Trail.all.find_by(name: trail_name), Time.now)
         puts "Successfully started new hike on #{trail_name}."
+        prompt.keypress("Press any key to continue")
     end
 
     #allow a user to select a hike to end
@@ -81,9 +83,11 @@ class TrailsPos
             hike_to_end.time_hiked = Time.now - hike_to_end.date
             hike_to_end.completed = true
             hike_to_end.save
+            puts "Hike successfully ended on #{hike_to_end.trail.name}."
         else
             puts "No incomplete hikes found."
         end
+        prompt.keypress("Press any key to continue")
     end
 
 
@@ -98,6 +102,7 @@ class TrailsPos
             edit_hike_menu(choice)
         else
             puts "You have no saved hikes at this time."
+            prompt.keypress("Press any key to continue")
         end
     end
 
@@ -105,13 +110,11 @@ class TrailsPos
     #TODO add exit option
     def edit_hike_menu(hike_instance)
         prompt = TTY::Prompt.new
-        menu = ["Delete", "Change Date", "Change Time on Trail"]
+        menu = ["Delete", "Change Time on Trail"]
         choice = prompt.select("Which action would you like to take?", menu)
         case choice
         when "Delete"
             delete_hike(hike_instance)
-        when "Change Date"
-            change_date(hike_instance)
         when "Change Time on Trail"
             change_time(hike_instance)
         end
@@ -122,21 +125,27 @@ class TrailsPos
         prompt = TTY::Prompt.new
         if prompt.yes?("Are you sure you would like to delete #{hike_instance.trail.name}" + hike_instance.date.strftime(" - %m/%d/%Y") + "?")
             hike_instance.destroy
+            puts "Hike has been deleted."
+        else
+            puts "Hike has not been deleted"
         end
+        prompt.keypress("Press any key to continue")
+    end
+    #get hours and minutes from user and update time on trail
+    def change_time(hike_instance)
+        prompt = TTY::Prompt.new
+        hours = prompt.ask("Enter time in hours: ").to_i
+        minutes = prompt.ask("Enter time in minutes: ").to_i
+        hike_instance.time_hiked = (hours * 3600) + (minutes * 60)
+        hike_instance.save
+        puts "New time saved."
+        prompt.keypress("Press any key to continue")
     end
 
-    #change date of hike
-    def change_date(hike_instance)
-        #TODO 
-    end
-
-    def change_tim(hike_instance)
-        #TODO
-    end
-
-#======================HIKE LISTING=======================================
+#======================HIKE/TRAIL LISTING=======================================
 #prints all hikes information from an array of hikes
-    def print_all_hikes(hike_array)
+    def print_hike_info(hike_array)
+        prompt = TTY::Prompt.new
         hike_array.each do |hike_instance|
             puts "Trail Name: #{hike_instance.trail.name}"
             puts "Trail Length: #{hike_instance.trail.length} miles"
@@ -146,6 +155,7 @@ class TrailsPos
             15.times {print "*"}
             print "\n"
         end
+        prompt.keypress("Press any key to continue")
     end
 
 
@@ -156,4 +166,4 @@ class TrailsPos
             [hike_instance.trail.name + hike_instance.date.strftime(" - %m/%d/%Y"), hike_instance]
         end.to_h
     end
-end#end of HIKINGPOS class
+end#end of TRAILSPOS class

@@ -1,3 +1,5 @@
+DatabaseCleaner.clean_with(:truncation)
+
 #50 users
 50.times do
     User.create(name: Faker::Name.first_name)
@@ -9,6 +11,6 @@ end
 end
 
 #50 hikes
-50.times do
+150.times do
     Hike.create(user: User.all.sample, trail: Trail.all.sample, date: Time.now - rand(43200), time_hiked: rand(1800..18000), completed: ([true, false].sample))
 end
