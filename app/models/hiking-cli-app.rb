@@ -22,7 +22,9 @@ class TrailsPos
         username = @prompt.ask("What is your username?")
         if User.all.map(&:name).include?(username)
             @current_user = User.all.find{|user_instance| user_instance.name == username}
-            main_menu
+            if password
+                main_menu
+            end
         else
             if @prompt.yes?("There is no user by this name. Would you like to create an account?")
                 create_account
@@ -30,11 +32,24 @@ class TrailsPos
         end
     end
 
+    #enter and check password, return true if password matches user's pasword
+    def password
+        password = @prompt.mask("Enter password: ")
+        if password == @current_user.password
+            true
+        else
+            puts "Password is invalid."
+            sleep(1)
+            false
+        end
+    end
+
     #create new user account
     def create_account
         
         new_user = @prompt.ask("Enter username: ")
-        @current_user = User.create(name: new_user)
+        new_password = @prompt.mask("Enter password: ")
+        @current_user = User.create(name: new_user, password: new_password)
         main_menu
     end
 
