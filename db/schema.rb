@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_30_012913) do
+ActiveRecord::Schema.define(version: 2019_12_30_184312) do
 
   create_table "hikes", force: :cascade do |t|
     t.datetime "date"
     t.integer "time_hiked"
     t.integer "user_id"
     t.integer "trail_id"
+    t.boolean "completed"
   end
 
   create_table "trails", force: :cascade do |t|
