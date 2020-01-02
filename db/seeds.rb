@@ -1,5 +1,3 @@
-DatabaseCleaner.clean_with(:truncation)
-
 #50 users
 50.times do
     User.create(name: Faker::Name.first_name, password: "1234")

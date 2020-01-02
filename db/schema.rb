@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_31_153140) do
+ActiveRecord::Schema.define(version: 2020_01_02_012913) do
 
   create_table "hikes", force: :cascade do |t|
     t.datetime "date"
@@ -20,9 +20,21 @@ ActiveRecord::Schema.define(version: 2019_12_31_153140) do
     t.boolean "completed"
   end
 
+  create_table "locations", force: :cascade do |t|
+    t.string "town"
+    t.string "state"
+  end
+
   create_table "trails", force: :cascade do |t|
     t.string "name"
     t.integer "length"
+    t.string "type"
+    t.string "summary"
+    t.string "difficulty"
+    t.integer "rating"
+    t.float "longitude"
+    t.float "lattitude"
+    t.integer "ascent"
   end
 
   create_table "users", force: :cascade do |t|

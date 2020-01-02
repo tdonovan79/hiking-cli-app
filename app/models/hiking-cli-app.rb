@@ -319,10 +319,12 @@ end
         puts "Name: #{@current_user.name}"
         puts "Number of hikes: #{@current_user.reload.hikes.length}"
         puts "Number of trails hiked: #{@current_user.reload.hikes.select(&:trail).uniq.length}"
-        #TODO fix this vvvvvvvv
-        #puts "Miles hiked: #{@current_user.reload.hikes.trails.select(&:length).sum}"
+        puts "Miles hiked: #{@current_user.reload.hikes.map(&:trail).map(&:length).sum}"
+        puts "Average Mile Per Hour: #{@current_user.complete_hikes.map(&:trail).map(&:length).sum.to_f / 
+            (@current_user.complete_hikes.map(&:time_hiked).sum/3600).to_f}"
         @prompt.keypress("Press any key to continue")
     end
+
 
 
 
