@@ -25,7 +25,7 @@ end
 
     town_state = trail_data["location"].split(", ")
     Location.create(town: town_state[0], state: town_state[1])
-    Trail.create(name: trail_data["name"], length: trail_data["length"], trail_type: trail_data["type"], summary: trail_data["summary"], difficulty: trail_data["difficulty"], rating: trail_data["stars"], longitude: trail_data["longitude"], latitude: trail_data["latitude"], location: Location.all[0])
+    Trail.create(name: trail_data["name"], length: trail_data["length"], trail_type: trail_data["type"], summary: trail_data["summary"], difficulty: trail_data["difficulty"], rating: trail_data["stars"], longitude: trail_data["longitude"], latitude: trail_data["latitude"], location: Location.last)
 end
 
 #=====================================================================

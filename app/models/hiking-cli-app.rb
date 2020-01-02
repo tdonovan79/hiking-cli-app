@@ -20,14 +20,14 @@ class TrailsPos
 #=========================LOGIN=======================================
 #display intro image and sound
 def intro
+    system 'clear'
     intro = PicDisplay.new
     intro.logo
-    sleep(6)
+    sleep(4)
     login
 end
 
 #get username and pass through to main menu 
-#TODO: passwords and authentication
     def login
         @current_user = nil
         system 'clear'
