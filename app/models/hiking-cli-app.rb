@@ -305,7 +305,7 @@ end
         puts "Name: #{trail_instance.name}"
         puts "Length: #{trail_instance.length} miles"
         puts "Location: #{trail_instance.location.town}, #{trail_instance.location.state}"
-        puts "Type: #{trail_instance.type}"
+        puts "Type: #{trail_instance.trail_type}"
         puts "Summary: #{trail_instance.summary}"
         puts "Difficulty: #{trail_instance.difficulty}"
         puts "Rating: #{trail_instance.rating}"
