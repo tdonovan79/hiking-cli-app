@@ -5,7 +5,7 @@ class TrailsPos
 
     #run program
     def run
-        login
+        intro
     end
 
     #initialize prompt
@@ -18,6 +18,14 @@ class TrailsPos
 #=====================================================================
 
 #=========================LOGIN=======================================
+#display intro image and sound
+def intro
+    intro = PicDisplay.new
+    intro.logo
+    sleep(6)
+    login
+end
+
 #get username and pass through to main menu 
 #TODO: passwords and authentication
     def login

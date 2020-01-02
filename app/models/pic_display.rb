@@ -26,6 +26,8 @@ puts "                   /    |        \\  \\
 /    |;;;;;;;\\                                             \\".colorize(:magenta)
     end
 
+    fork { exec 'afplay', "app/hawk_screech.mp3" }
+
 
 
 end
