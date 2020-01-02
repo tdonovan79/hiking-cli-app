@@ -271,7 +271,7 @@ end
 
 #choose to search for trail by name or by length
     def search_for_trail(trail_array)
-        menu = ["Name", "Length"]
+        menu = ["Name", "Length", "Region", "Rating"]
         system 'clear'
         choice = @prompt.select("Search by name or length?", menu)
         case choice
@@ -279,6 +279,10 @@ end
             search_trail_name(trail_array)
         when "Length"
             search_trail_length(trail_array)
+        when "Region"
+            search_trail_region(trail_array)
+        when "Rating"
+            search_trail_rating(trail_array)
         end
     end
 
@@ -286,8 +290,8 @@ end
     def search_trail_name(trail_array)
         system 'clear'
         search_name = @prompt.ask("Enter name: ")
-        search_trail = trail_array.find_by(name: search_name)
-        if search_trail.nil?
+        search_results = trail_array.find_by(name: search_name)
+        if search_results.nil?
             puts "No trail found by that name."
         else
             trail_printer(search_trail)
@@ -302,7 +306,38 @@ end
             key(:end).ask("To: ")
         end
         search_results = trail_array.select{|trail_instance| trail_instance.length.between?(range[:begin].to_i, range[:end].to_i)}
-        search_results.each{|trail_instance| trail_printer(trail_instance)}
+        if search_results.length == 0
+            puts "No trails with that length"
+        else
+            search_results.each{|trail_instance| trail_printer(trail_instance)}
+        end
+    end
+
+#search for trail by Region
+    def search_trail_region(trail_array)
+        system 'clear'
+        region = @prompt.ask("Enter region name:")
+        search_results = trail_array.select{|trail_instance| trail_instance.location.state == region}
+        if search_results.length == 0
+            puts "No trails in that region."
+        else
+            search_results.each{|trail_instance| trail_printer(trail_instance)}
+        end
+    end
+
+#search for trail by rating in a range and return and print array of trails
+    def search_trail_rating(trail_array)
+        system 'clear'
+        range = @prompt.collect do
+            key(:begin).ask("Min: ")
+            key(:end).ask("Max: ")
+        end
+        search_results = trail_array.select{|trail_instance| trail_instance.rating.between?(range[:begin].to_i, range[:end].to_i)}
+        if search_results.length == 0
+            puts "No trails with that length"
+        else
+            search_results.each{|trail_instance| trail_printer(trail_instance)}
+        end
     end
 
 
