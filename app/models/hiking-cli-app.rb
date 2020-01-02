@@ -302,8 +302,14 @@ end
 
 #take in argument of trail and displays info in easy to read format
     def trail_printer(trail_instance)
-        puts "Trail Name: #{trail_instance.name}"
-        puts "Trail Length: #{trail_instance.length} miles"
+        puts "Name: #{trail_instance.name}"
+        puts "Length: #{trail_instance.length} miles"
+        puts "Location: #{trail_instance.location.town}, #{trail_instance.location.state}"
+        puts "Type: #{trail_instance.type}"
+        puts "Summary: #{trail_instance.summary}"
+        puts "Difficulty: #{trail_instance.difficulty}"
+        puts "Rating: #{trail_instance.rating}"
+        puts "Trailhead: lat - #{trail_instance.latitude} long - #{trail_instance.longitude}"
         15.times {print "*"}
         print "\n"
     end
