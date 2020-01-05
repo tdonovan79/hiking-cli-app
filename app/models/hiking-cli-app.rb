@@ -101,7 +101,6 @@ class TrailsPos
             "Quit"]
         choice = nil
         while choice != "Quit"
-            sleep(0.5)
             system 'clear'
             puts "------MAIN MENU------"
             choice = @prompt.select("What would you like to do #{@current_user.name}?", menu)
@@ -416,13 +415,7 @@ end
     def user_stats
         system 'clear'
         puts "-----MY STATS-----"
-        puts "Name: #{@current_user.name}"
-        puts "Number of hikes: #{@current_user.reload.hikes.length}"
-        puts "Number of trails hiked: #{@current_user.reload.hikes.select(&:trail).uniq.length}"
-        puts "Miles hiked: #{@current_user.reload.hikes.map(&:trail).map(&:length).sum}"
-        puts "Average Mile Per Hour: #{@current_user.complete_hikes.map(&:trail).map(&:length).sum.to_f / 
-            (@current_user.complete_hikes.map(&:time_hiked).sum/3600).to_f}"
-        @prompt.keypress("Press any key to continue")
+        @current_user.display_stats
     end
 
 
