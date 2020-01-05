@@ -4,4 +4,10 @@
 class Hike < ActiveRecord::Base
     belongs_to :trail
     belongs_to :user
+
+    def end_hike
+        self.time_hiked = Time.now - self.date
+        self.completed = true
+        self.save
+    end
 end

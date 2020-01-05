@@ -138,7 +138,7 @@ class TrailsPos
         when "Start New Hike"
             start_hike
         when "End Hike"
-        end_hike
+            end_hike
         when "Edit Hike"
             edit_options
         when "List All My Hikes"
@@ -157,7 +157,7 @@ class TrailsPos
         puts "-----MY HIKES-----"
         trail_name = @prompt.select("Which trail?", ["Cancel"] + Trail.all.map(&:name))
         if trail_name != "Cancel"
-            @current_user.new_hike(Trail.all.find_by(name: trail_name), Time.now)
+            Hike.new(date: Time.now, trail: Trail.all.find_by(name: trail_name))
             puts "Successfully started new hike on #{trail_name}."
             @prompt.keypress("Press any key to continue")
         end
@@ -165,15 +165,15 @@ class TrailsPos
 
     #allow a user to select a hike to end
     def end_hike
-        menu = hike_menu_maker(@current_user.incomplete_hikes)
+        menu = self.incomplete_hikes.map do |hike_instance|
+            [hike_instance.trail.name + hike_instance.date.strftime(" - %m/%d/%Y - %H:%M"), hike_instance]
+        end.to_h
         #if no incomplete hikes, display error and exit function. else continue
         if menu.length > 0
             menu["Cancel"] = "Cancel"
-            hike_to_end = @prompt.select("Which trail?", menu)
+            hike_to_end = TTY::Prompt.new.select("Which trail?", menu)
             if hike_to_end != "Cancel"
-                hike_to_end.time_hiked = Time.now - hike_to_end.date
-                hike_to_end.completed = true
-                hike_to_end.save
+                hike_to_end.end_hike
                 puts "Hike successfully ended on #{hike_to_end.trail.name}."
                 @prompt.keypress("Press any key to continue")
             end
@@ -202,7 +202,6 @@ class TrailsPos
     end
 
     #choose what you would like to edit
-    #TODO add exit option
     def edit_hike_menu(hike_instance)
         menu = ["Delete", "Change Time on Trail", "Exit"]
         system 'clear'
@@ -269,7 +268,7 @@ class TrailsPos
 
 #===========================HIKE HELPERS===============================
 
-#takes in array of hikes, outputs infor in structure for menu choices
+#takes in array of hikes, outputs info in structure for menu choices
     def hike_menu_maker(hike_array)
         hike_array.map do |hike_instance|
             [hike_instance.trail.name + hike_instance.date.strftime(" - %m/%d/%Y - %H:%M"), hike_instance]
