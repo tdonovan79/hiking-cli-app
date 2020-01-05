@@ -157,7 +157,7 @@ class TrailsPos
         puts "-----MY HIKES-----"
         trail_name = @prompt.select("Which trail?", ["Cancel"] + Trail.all.map(&:name))
         if trail_name != "Cancel"
-            Hike.new(date: Time.now, trail: Trail.all.find_by(name: trail_name))
+            Hike.create(date: Time.now, trail: Trail.all.find_by(name: trail_name), user: @current_user, completed: false)
             puts "Successfully started new hike on #{trail_name}."
             @prompt.keypress("Press any key to continue")
         end
@@ -165,9 +165,7 @@ class TrailsPos
 
     #allow a user to select a hike to end
     def end_hike
-        menu = self.incomplete_hikes.map do |hike_instance|
-            [hike_instance.trail.name + hike_instance.date.strftime(" - %m/%d/%Y - %H:%M"), hike_instance]
-        end.to_h
+        menu = hike_menu_maker(@current_user.reload.incomplete_hikes)
         #if no incomplete hikes, display error and exit function. else continue
         if menu.length > 0
             menu["Cancel"] = "Cancel"
@@ -246,11 +244,7 @@ class TrailsPos
 #prints all hikes information from an array of hikes
     def print_hike_info(hike_array)
         hike_array.each do |hike_instance|
-            puts "Trail Name: #{hike_instance.trail.name}"
-            puts "Trail Length: #{hike_instance.trail.length} miles"
-            puts hike_instance.date.strftime("Date Hiked: %m/%d/%Y")
-            puts hike_instance.time_hiked.nil? ? "Length of Time on Trail: Hike not completed" : Time.at(hike_instance.time_hiked).utc.strftime("Length of Time on Trail: %H:%M")
-            puts "Status: #{hike_instance.completed? ? "completed" : "incomplete"}"
+            hike_instance.print_info
             15.times {print "*"}
             print "\n"
         end
@@ -393,14 +387,7 @@ end
 
 #take in argument of trail and displays info in easy to read format
     def trail_printer(trail_instance)
-        puts "Name: #{trail_instance.name}"
-        puts "Length: #{trail_instance.length} miles"
-        puts "Location: #{trail_instance.location.town}, #{trail_instance.location.state}"
-        puts "Type: #{trail_instance.trail_type}"
-        puts "Summary: #{trail_instance.summary}"
-        puts "Difficulty: #{trail_instance.difficulty}"
-        puts "Rating: #{trail_instance.rating}"
-        puts "Trailhead: lat - #{trail_instance.latitude} long - #{trail_instance.longitude}"
+        trail_instance.print_info
         15.times {print "*"}
         print "\n"
     end
@@ -416,13 +403,5 @@ end
         puts "-----MY STATS-----"
         @current_user.display_stats
     end
-
-
-
-
-#==========================HELPER FUNCTIONS============================
-
-
-
 #=====================================================================
 end#end of TRAILSPOS class
