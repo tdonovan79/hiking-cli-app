@@ -19,19 +19,35 @@ class TrailsPos
 
 #=========================LOGIN=======================================
 #display intro image and sound
-def intro
-    system 'clear'
-    intro = PicDisplay.new
-    intro.logo
-    sleep(4)
-    login
-end
+    def intro
+        system 'clear'
+        intro = PicDisplay.new
+        intro.logo
+        sleep(4)
+        welcome
+    end
+
+#welcome user and see if they would like to log in or make an account
+    def welcome
+        system 'clear'
+        puts "--------LOGIN--------"
+        menu = ["Login", "Create new user"]
+        choice = @prompt.select("", menu)
+        case choice
+        when "Login"
+            login
+        when "Create new user"
+            create_account
+        end
+    end
+
 
 #get username and pass through to main menu 
     def login
         @current_user = nil
         system 'clear'
-        username = @prompt.ask("What is your username?")
+        puts "--------LOGIN--------"
+        username = @prompt.ask("Username: ")
         if User.all.map(&:name).include?(username)
             @current_user = User.all.find{|user_instance| user_instance.name == username}
             if password
@@ -58,8 +74,18 @@ end
 
     #create new user account
     def create_account
-        new_user = @prompt.ask("Enter username: ")
-        new_password = @prompt.mask("Enter password: ")
+        system 'clear'
+        puts "--------LOGIN--------"
+        used_flag = false
+        while !used_flag
+            new_user = @prompt.ask("Enter username: ")
+            if !User.all.map(&:name).include?(new_user)
+                new_password = @prompt.mask("Enter password: ")
+                used_flag = 1
+            else
+                puts "Username already taken"
+            end
+        end
         @current_user = User.create(name: new_user, password: new_password)
         main_menu
     end
@@ -77,7 +103,7 @@ end
         while choice != "Quit"
             sleep(0.5)
             system 'clear'
-
+            puts "------MAIN MENU------"
             choice = @prompt.select("What would you like to do #{@current_user.name}?", menu)
 
             case choice
@@ -100,6 +126,7 @@ end
 #hike menu
     def hike_options
         system 'clear'
+        puts "-----MY HIKES-----"
         menu = ["Start New Hike",
             "End Hike",
             "Edit Hike",
@@ -127,10 +154,14 @@ end
 
 #log a new hike for a user
     def start_hike
-        trail_name = @prompt.select("Which trail?", Trail.all.map(&:name))
-        @current_user.new_hike(Trail.all.find_by(name: trail_name), Time.now)
-        puts "Successfully started new hike on #{trail_name}."
-        @prompt.keypress("Press any key to continue")
+        system 'clear'
+        puts "-----MY HIKES-----"
+        trail_name = @prompt.select("Which trail?", ["Cancel"] + Trail.all.map(&:name))
+        if trail_name != "Cancel"
+            @current_user.new_hike(Trail.all.find_by(name: trail_name), Time.now)
+            puts "Successfully started new hike on #{trail_name}."
+            @prompt.keypress("Press any key to continue")
+        end
     end
 
     #allow a user to select a hike to end
@@ -138,15 +169,19 @@ end
         menu = hike_menu_maker(@current_user.incomplete_hikes)
         #if no incomplete hikes, display error and exit function. else continue
         if menu.length > 0
+            menu["Cancel"] = "Cancel"
             hike_to_end = @prompt.select("Which trail?", menu)
-            hike_to_end.time_hiked = Time.now - hike_to_end.date
-            hike_to_end.completed = true
-            hike_to_end.save
-            puts "Hike successfully ended on #{hike_to_end.trail.name}."
+            if hike_to_end != "Cancel"
+                hike_to_end.time_hiked = Time.now - hike_to_end.date
+                hike_to_end.completed = true
+                hike_to_end.save
+                puts "Hike successfully ended on #{hike_to_end.trail.name}."
+                @prompt.keypress("Press any key to continue")
+            end
         else
             puts "No incomplete hikes found."
+            @prompt.keypress("Press any key to continue")
         end
-        @prompt.keypress("Press any key to continue")
     end
 
 
@@ -156,7 +191,9 @@ end
     def edit_options
         menu = hike_menu_maker(@current_user.reload.hikes)
         system 'clear'
+        puts "-----MY HIKES-----"
         if menu.length > 0
+            menu["Cancel"] = "Cancel"
             choice = @prompt.select("Which hike would you like to edit?", menu)
             edit_hike_menu(choice)
         else
@@ -170,7 +207,8 @@ end
     def edit_hike_menu(hike_instance)
         menu = ["Delete", "Change Time on Trail", "Exit"]
         system 'clear'
-        choice = @prompt.select("Which action would you like to take?", menu)
+        puts "-----MY HIKES-----"
+        choice = @prompt.select("Which action would you like to take?", ["Cancel"] + menu)
         case choice
         when "Delete"
             delete_hike(hike_instance)
@@ -182,6 +220,7 @@ end
     #after warning message, delete hike
     def delete_hike(hike_instance)
         system 'clear'
+        puts "-----MY HIKES-----"
         if @prompt.yes?("Are you sure you would like to delete #{hike_instance.trail.name}" + hike_instance.date.strftime(" - %m/%d/%Y") + "?")
             hike_instance.destroy
             puts "Hike has been deleted."
@@ -192,6 +231,8 @@ end
     end
     #get hours and minutes from user and update time on trail
     def change_time(hike_instance)
+        system 'clear'
+        puts "-----MY HIKES-----"
         hours = @prompt.ask("Enter time in hours: ").to_i
         minutes = @prompt.ask("Enter time in minutes: ").to_i
         hike_instance.time_hiked = (hours * 3600) + (minutes * 60)
@@ -245,6 +286,7 @@ def trail_options
         "Search for Trail", 
         "Exit"]
     system 'clear'
+    puts "------TRAILS------"
     choice = @prompt.select("Which action would you like to take?", menu)
     case choice
     when "View All Trails"
@@ -273,7 +315,8 @@ end
     def search_for_trail(trail_array)
         menu = ["Name", "Length", "Region", "Rating"]
         system 'clear'
-        choice = @prompt.select("Search by name or length?", menu)
+        puts "------TRAILS------"
+        choice = @prompt.select("Search by:", menu)
         case choice
         when "Name"
             search_trail_name(trail_array)
@@ -289,6 +332,7 @@ end
 #search for trail by name and then print info for trail
     def search_trail_name(trail_array)
         system 'clear'
+        puts "------TRAILS------"
         search_name = @prompt.ask("Enter name: ")
         search_results = trail_array.find_by(name: search_name)
         if search_results.nil?
@@ -301,6 +345,7 @@ end
 #search for trail by length in a range and return and print array of trails
     def search_trail_length(trail_array)
         system 'clear'
+        puts "------TRAILS------"
         range = @prompt.collect do
             key(:begin).ask("From: ")
             key(:end).ask("To: ")
@@ -316,6 +361,7 @@ end
 #search for trail by Region
     def search_trail_region(trail_array)
         system 'clear'
+        puts "------TRAILS------"
         region = @prompt.ask("Enter region name:")
         search_results = trail_array.select{|trail_instance| trail_instance.location.state == region}
         if search_results.length == 0
@@ -328,6 +374,7 @@ end
 #search for trail by rating in a range and return and print array of trails
     def search_trail_rating(trail_array)
         system 'clear'
+        puts "------TRAILS------"
         range = @prompt.collect do
             key(:begin).ask("Min: ")
             key(:end).ask("Max: ")
@@ -365,6 +412,7 @@ end
 #view user stats
     def user_stats
         system 'clear'
+        puts "-----MY STATS-----"
         puts "Name: #{@current_user.name}"
         puts "Number of hikes: #{@current_user.reload.hikes.length}"
         puts "Number of trails hiked: #{@current_user.reload.hikes.select(&:trail).uniq.length}"
