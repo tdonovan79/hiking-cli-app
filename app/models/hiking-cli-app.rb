@@ -47,7 +47,7 @@ class TrailsPos
         @current_user = nil
         system 'clear'
         puts "--------LOGIN--------"
-        username = @prompt.ask("Username: ")
+        username = @prompt.ask("Username: ", required: true)
         if User.all.map(&:name).include?(username)
             @current_user = User.all.find{|user_instance| user_instance.name == username}
             if password
@@ -62,7 +62,7 @@ class TrailsPos
 
     #enter and check password, return true if password matches user's pasword
     def password
-        password = @prompt.mask("Enter password: ")
+        password = @prompt.mask("Enter password: ", required: true)
         if password == @current_user.password
             true
         else
@@ -78,9 +78,9 @@ class TrailsPos
         puts "--------LOGIN--------"
         used_flag = false
         while !used_flag
-            new_user = @prompt.ask("Enter username: ")
+            new_user = @prompt.ask("Enter username: ", required: true)
             if !User.all.map(&:name).include?(new_user)
-                new_password = @prompt.mask("Enter password: ")
+                new_password = @prompt.mask("Enter password: ", required: true)
                 used_flag = 1
             else
                 puts "Username already taken"
@@ -208,7 +208,7 @@ class TrailsPos
         menu = ["Delete", "Change Time on Trail", "Exit"]
         system 'clear'
         puts "-----MY HIKES-----"
-        choice = @prompt.select("Which action would you like to take?", ["Cancel"] + menu)
+        choice = @prompt.select("Which action would you like to take?", menu)
         case choice
         when "Delete"
             delete_hike(hike_instance)
@@ -233,8 +233,11 @@ class TrailsPos
     def change_time(hike_instance)
         system 'clear'
         puts "-----MY HIKES-----"
-        hours = @prompt.ask("Enter time in hours: ").to_i
-        minutes = @prompt.ask("Enter time in minutes: ").to_i
+        hours = @prompt.ask("Enter time in hours: ", required: true, convert: :int) {|input| input.in('0-24')}
+        minutes = 61
+        while minutes > 60 || minutes < 0
+            minutes = @prompt.ask("Enter time in minutes: ", required: true, convert: :int) {|input| input.in('0-60')}
+        end
         hike_instance.time_hiked = (hours * 3600) + (minutes * 60)
         hike_instance.save
         puts "New time saved."
@@ -333,7 +336,7 @@ end
     def search_trail_name(trail_array)
         system 'clear'
         puts "------TRAILS------"
-        search_name = @prompt.ask("Enter name: ")
+        search_name = @prompt.ask("Enter name: ", required: true)
         search_results = trail_array.find_by(name: search_name)
         if search_results.nil?
             puts "No trail found by that name."
@@ -347,8 +350,8 @@ end
         system 'clear'
         puts "------TRAILS------"
         range = @prompt.collect do
-            key(:begin).ask("From: ")
-            key(:end).ask("To: ")
+            key(:begin).ask("From: ", required: true, convert: :int) {|input| input.in('0-100')}
+            key(:end).ask("To: ", required: true, convert: :int) {|input| input.in('0-100')}
         end
         search_results = trail_array.select{|trail_instance| trail_instance.length.between?(range[:begin].to_i, range[:end].to_i)}
         if search_results.length == 0
@@ -362,7 +365,7 @@ end
     def search_trail_region(trail_array)
         system 'clear'
         puts "------TRAILS------"
-        region = @prompt.ask("Enter region name:")
+        region = @prompt.ask("Enter region name:", required: true)
         search_results = trail_array.select{|trail_instance| trail_instance.location.state == region}
         if search_results.length == 0
             puts "No trails in that region."
@@ -376,8 +379,8 @@ end
         system 'clear'
         puts "------TRAILS------"
         range = @prompt.collect do
-            key(:begin).ask("Min: ")
-            key(:end).ask("Max: ")
+            key(:begin).ask("Min: ", required: true)
+            key(:end).ask("Max: ", required: true)
         end
         search_results = trail_array.select{|trail_instance| trail_instance.rating.between?(range[:begin].to_i, range[:end].to_i)}
         if search_results.length == 0
